@@ -9,6 +9,8 @@ const auth = async (req, res, next) => {
         .json({ msg: "No authentication token , authorization denied" });
     }
     try {
+        console.log("secret -----", process.env.JWT_SECRET)
+        console.log("token -----", token)
         const verified =  jwt.verify(token, process.env.JWT_SECRET);
         console.log("verified", verified);
     } catch (error) {
