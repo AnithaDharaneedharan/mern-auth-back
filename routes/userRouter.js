@@ -73,6 +73,7 @@ router.post("/login", async (req, res) => {
      if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+     console.log("signed token", token)
      res.json({
        token,
        user: {
@@ -88,7 +89,25 @@ router.post("/login", async (req, res) => {
  });
 
  router.delete('/delete', auth, async (req, res) => {
-   console.log("ene")
+   try {
+     const deletedUser = await User.findByIdAndDelete(req.user);
+     res.json(deletedUser)
+   } catch (error) {
+     res.status(500).json({error : error.message })
+   }
  })
 
+ router.post("/tokenIsValid", async (req, res) => {
+   try {
+     const token = req.header("x-auth-token");
+     if(!token) return res.json(false);
+     const verified = jwt.verify(token, process.env.JWT_SECRET);
+     if (!verified) return res.json(false);
+     const user = await User.findById(verified.id)
+     if (!user) return res.json(false);
+     return res.json(user)
+   } catch (error) {
+     res.status(500).json({error: error.message})
+   }
+ })
 module.exports = router;
